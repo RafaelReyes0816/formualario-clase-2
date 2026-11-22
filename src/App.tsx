@@ -107,13 +107,6 @@ function App() {
       // With no-cors mode, we can't read the response, but the request was sent
       setStatus('success');
       setStatusMessage('¡Datos enviados exitosamente a Google Sheets!');
-      
-      // Reset form after success
-      setTimeout(() => {
-        setActivities(initialActivities);
-        setStatus('idle');
-        setStatusMessage('');
-      }, 3000);
     } catch (error) {
       setStatus('error');
       setStatusMessage('Error al enviar. Verifica la URL de Google Apps Script.');
@@ -371,6 +364,67 @@ function App() {
           <p>Checklist interactivo • Conectado con Google Sheets</p>
         </div>
       </div>
+
+      {/* Congrats Modal */}
+      {status === 'success' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          
+          {/* Modal Content */}
+          <div className="relative bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 rounded-3xl p-8 md:p-10 max-w-lg w-full border border-white/20 shadow-2xl shadow-purple-500/20 animate-fade-in">
+            {/* Confetti decoration */}
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2">
+              <div className="flex gap-2 text-4xl animate-bounce">
+                <span>🎉</span>
+                <span>✨</span>
+                <span>🎊</span>
+              </div>
+            </div>
+
+            {/* Close button */}
+            <button
+              onClick={() => {
+                setActivities(initialActivities);
+                setStatus('idle');
+                setStatusMessage('');
+              }}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Content */}
+            <div className="text-center mt-4">
+              <div className="text-6xl mb-4">🏆</div>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                ¡Felicitaciones!
+              </h2>
+              <div className="bg-white/10 rounded-2xl p-6 border border-white/20 mb-6">
+                <p className="text-lg text-purple-100 leading-relaxed mb-3">
+                  Ya tienes <strong className="text-white">tres publicaciones publicitarias</strong> y <strong className="text-white">una historia</strong> para tu negocio.
+                </p>
+                <div className="w-full h-px bg-white/20 my-4" />
+                <p className="text-base text-purple-200 leading-relaxed">
+                  En el <strong className="text-yellow-300">Día 3</strong> utilizarás estos materiales para crear un <strong className="text-yellow-300">video promocional con CapCut</strong>. 🎬
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setActivities(initialActivities);
+                  setStatus('idle');
+                  setStatusMessage('');
+                }}
+                className="w-full py-4 px-6 rounded-xl font-bold text-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-400 hover:to-emerald-400 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-green-500/25"
+              >
+                ¡Entendido! Continuar ➜
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
