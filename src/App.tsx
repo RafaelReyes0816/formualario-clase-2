@@ -30,6 +30,7 @@ function App() {
   const [scriptUrl, setScriptUrl] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [statusMessage, setStatusMessage] = useState('');
+  const [codeCopied, setCodeCopied] = useState(false);
 
   // Load saved data from localStorage
   useEffect(() => {
@@ -39,8 +40,57 @@ function App() {
     
     if (savedName) setName(savedName);
     if (savedActivities) setActivities(JSON.parse(savedActivities));
-    if (savedUrl) setScriptUrl(savedUrl);
+    if (savedUrl) {
+      setScriptUrl(savedUrl);
+    } else {
+      setShowSetup(true); // Auto-open setup if no URL configured
+    }
   }, []);
+
+  const appsScriptCode = `function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+  
+  // Header row (first time only)
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow([
+      "Nombre", "Fecha", "Progreso",
+      "Act 1", "Act 2", "Act 3", "Act 4",
+      "Act 5", "Act 6", "Act 7", "Act 8",
+      "Act 9", "Act 10", "Act 11", "Act 12",
+      "Act 13", "Act 14"
+    ]);
+  }
+  
+  var row = [data.nombre, data.fecha, data.progreso];
+  data.actividades.forEach(function(act) {
+    row.push(act.completada);
+  });
+  
+  sheet.appendRow(row);
+  
+  return ContentService
+    .createTextOutput(JSON.stringify({status: "success"}))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(appsScriptCode);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2500);
+    } catch {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = appsScriptCode;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2500);
+    }
+  };
 
   // Save to localStorage whenever data changes
   useEffect(() => {
@@ -229,7 +279,7 @@ function App() {
           >
             <span className="flex items-center gap-2">
               <span>🔗</span>
-              Configuración de Google Sheets
+              {scriptUrl ? '✅ Google Sheets conectado' : '⚙️ Configurar Google Sheets'}
             </span>
             <svg
               className={`w-5 h-5 transition-transform duration-200 ${showSetup ? 'rotate-180' : ''}`}
@@ -242,62 +292,156 @@ function App() {
           </button>
 
           {showSetup && (
-            <div className="mt-4 space-y-4">
-              <div className="bg-black/20 rounded-xl p-4 border border-white/10">
-                <h3 className="text-purple-200 font-medium mb-3 text-sm">📌 Pasos para conectar con Google Sheets:</h3>
-                <ol className="text-purple-300/80 text-sm space-y-2 list-decimal list-inside">
-                  <li>Crea una nueva hoja de cálculo en Google Sheets</li>
-                  <li>Ve a <strong className="text-white">Extensiones → Apps Script</strong></li>
-                  <li>Pega el siguiente código:</li>
-                </ol>
-                <div className="mt-3 bg-gray-900 rounded-lg p-3 overflow-x-auto">
-                  <pre className="text-green-400 text-xs leading-relaxed">{`function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
-  
-  // Header row (first time only)
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow([
-      "Nombre", "Fecha", "Progreso",
-      "Act 1", "Act 2", "Act 3", "Act 4",
-      "Act 5", "Act 6", "Act 7", "Act 8",
-      "Act 9", "Act 10", "Act 11", "Act 12",
-      "Act 13", "Act 14"
-    ]);
-  }
-  
-  var row = [data.nombre, data.fecha, data.progreso];
-  data.actividades.forEach(function(act) {
-    row.push(act.completada);
-  });
-  
-  sheet.appendRow(row);
-  
-  return ContentService
-    .createTextOutput(JSON.stringify({status: "success"}))
-    .setMimeType(ContentService.MimeType.JSON);
-}`}</pre>
+            <div className="mt-4 space-y-5">
+              {/* Step by step guide */}
+              <div className="bg-black/20 rounded-xl p-5 border border-white/10">
+                <h3 className="text-white font-bold mb-4 text-base flex items-center gap-2">
+                  <span className="bg-green-500/20 text-green-300 px-2 py-0.5 rounded-md text-xs font-bold">GUÍA</span>
+                  Cómo conectar con Google Sheets
+                </h3>
+
+                {/* Step 1 */}
+                <div className="flex gap-3 mb-4">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/30 border border-purple-400/50 flex items-center justify-center text-purple-200 text-sm font-bold">1</div>
+                  <div>
+                    <p className="text-white font-medium text-sm">Crea una hoja de cálculo</p>
+                    <p className="text-purple-300/70 text-xs mt-1">
+                      Ve a <a href="https://sheets.google.com" target="_blank" rel="noopener noreferrer" className="text-purple-300 underline hover:text-white">sheets.google.com</a> y crea un nuevo spreadsheet vacío.
+                    </p>
+                  </div>
                 </div>
-                <ol className="text-purple-300/80 text-sm space-y-2 list-decimal list-inside mt-3" start={4}>
-                  <li>Guarda el proyecto y haz clic en <strong className="text-white">Implementar → Nueva implementación</strong></li>
-                  <li>Selecciona tipo: <strong className="text-white">Aplicación web</strong></li>
-                  <li>En "Quién tiene acceso" selecciona: <strong className="text-white">Cualquier persona</strong></li>
-                  <li>Copia la URL de la aplicación web y pégala abajo</li>
-                </ol>
+
+                {/* Step 2 */}
+                <div className="flex gap-3 mb-4">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/30 border border-purple-400/50 flex items-center justify-center text-purple-200 text-sm font-bold">2</div>
+                  <div>
+                    <p className="text-white font-medium text-sm">Abre el editor de Apps Script</p>
+                    <p className="text-purple-300/70 text-xs mt-1">
+                      En tu hoja, ve a <strong className="text-white">Extensiones → Apps Script</strong>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div className="flex gap-3 mb-4">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/30 border border-purple-400/50 flex items-center justify-center text-purple-200 text-sm font-bold">3</div>
+                  <div className="flex-1">
+                    <p className="text-white font-medium text-sm">Copia y pega este código</p>
+                    <p className="text-purple-300/70 text-xs mt-1 mb-3">
+                      Borra todo el contenido del editor y pega el siguiente código:
+                    </p>
+                    
+                    {/* Code block with copy button */}
+                    <div className="relative bg-gray-900 rounded-lg overflow-hidden border border-white/10">
+                      <div className="flex items-center justify-between px-3 py-2 bg-gray-800/50 border-b border-white/10">
+                        <span className="text-gray-400 text-xs font-mono">Apps Script</span>
+                        <button
+                          onClick={handleCopyCode}
+                          className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all duration-200 ${
+                            codeCopied
+                              ? 'bg-green-500/20 text-green-300 border border-green-400/30'
+                              : 'bg-purple-500/20 text-purple-200 border border-purple-400/30 hover:bg-purple-500/30'
+                          }`}
+                        >
+                          {codeCopied ? (
+                            <>
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              ¡Copiado!
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                              </svg>
+                              Copiar código
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <pre className="text-green-400 text-xs leading-relaxed p-3 overflow-x-auto max-h-48 overflow-y-auto">{appsScriptCode}</pre>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 4 */}
+                <div className="flex gap-3 mb-4">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/30 border border-purple-400/50 flex items-center justify-center text-purple-200 text-sm font-bold">4</div>
+                  <div>
+                    <p className="text-white font-medium text-sm">Guarda el proyecto</p>
+                    <p className="text-purple-300/70 text-xs mt-1">
+                      Presiona <strong className="text-white">Ctrl + S</strong> o el ícono de guardar 💾
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 5 */}
+                <div className="flex gap-3 mb-4">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/30 border border-purple-400/50 flex items-center justify-center text-purple-200 text-sm font-bold">5</div>
+                  <div>
+                    <p className="text-white font-medium text-sm">Implementa como aplicación web</p>
+                    <p className="text-purple-300/70 text-xs mt-1">
+                      Haz clic en <strong className="text-white">Implementar → Nueva implementación</strong>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 6 */}
+                <div className="flex gap-3 mb-4">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/30 border border-purple-400/50 flex items-center justify-center text-purple-200 text-sm font-bold">6</div>
+                  <div>
+                    <p className="text-white font-medium text-sm">Configura los permisos</p>
+                    <p className="text-purple-300/70 text-xs mt-1">
+                      Tipo: <strong className="text-white">Aplicación web</strong><br/>
+                      Ejecutar como: <strong className="text-white">Yo</strong><br/>
+                      Quién tiene acceso: <strong className="text-white">Cualquier persona</strong>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 7 */}
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-green-500/30 border border-green-400/50 flex items-center justify-center text-green-200 text-sm font-bold">7</div>
+                  <div>
+                    <p className="text-white font-medium text-sm">Copia la URL y pégala abajo</p>
+                    <p className="text-purple-300/70 text-xs mt-1">
+                      Después de implementar, copia la URL que te da Google y pégala en el campo de abajo 👇
+                    </p>
+                  </div>
+                </div>
               </div>
 
+              {/* URL Input */}
               <div>
-                <label className="block text-white font-medium mb-2 text-sm">
-                  URL de Google Apps Script:
+                <label className="block text-white font-medium mb-2 text-sm flex items-center gap-2">
+                  <span>🔗</span> URL de tu aplicación web:
                 </label>
                 <input
                   type="url"
                   value={scriptUrl}
                   onChange={(e) => setScriptUrl(e.target.value)}
-                  placeholder="https://script.google.com/macros/s/..."
+                  placeholder="https://script.google.com/macros/s/AKfycb.../exec"
                   className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all text-sm"
                 />
+                {scriptUrl && (
+                  <p className="text-green-300 text-xs mt-2 flex items-center gap-1">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    URL configurada correctamente
+                  </p>
+                )}
               </div>
+
+              {/* Test connection button */}
+              {scriptUrl && (
+                <div className="bg-yellow-500/10 border border-yellow-400/20 rounded-xl p-4">
+                  <p className="text-yellow-200 text-sm">
+                    💡 <strong>Tip:</strong> Después de pegar la URL, puedes probar el formulario llenando tu nombre, marcando algunas actividades y presionando "Enviar a Google Sheets". Los datos aparecerán en tu hoja de cálculo.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
