@@ -1,4 +1,18 @@
 import { useState, useEffect } from 'react';
+import {
+  AlertCircle,
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  ClipboardList,
+  Info,
+  Loader2,
+  RotateCcw,
+  Send,
+  Trophy,
+  UserRound,
+  X,
+} from 'lucide-react';
 
 interface Activity {
   id: number;
@@ -107,227 +121,202 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 p-4 md:p-8">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm mb-4">
-            <span className="text-3xl">📋</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-            Checklist Día 2
-          </h1>
-          <p className="text-purple-200 text-lg">
-            Marca las actividades completadas
-          </p>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 mb-6 border border-white/20">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-white font-medium">Progreso</span>
-            <span className="text-purple-200 font-bold">{completedCount}/{totalCount} ({progressPercent}%)</span>
-          </div>
-          <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-500 ease-out"
-              style={{
-                width: `${progressPercent}%`,
-                background: 'linear-gradient(90deg, #818cf8, #c084fc, #f472b6)'
-              }}
-            />
-          </div>
-          {progressPercent === 100 && (
-            <p className="text-green-300 text-sm mt-2 text-center font-medium animate-pulse">
-              🎉 ¡Todas las actividades completadas!
-            </p>
-          )}
-        </div>
-
-        {/* Name Input */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-white/20">
-          <label className="block text-white font-medium mb-3">
-            👤 Tu nombre
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Escribe tu nombre completo..."
-            className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all"
-          />
-          <p className="text-purple-300/70 text-sm mt-2">
-            Tu nombre se guarda junto a tus respuestas.
-          </p>
-        </div>
-
-        {/* Activities Checklist */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-white/20">
-          <h2 className="text-white font-bold text-lg mb-4">
-            ✅ Actividades del Día 2
-          </h2>
-          <div className="space-y-3">
-            {activities.map((activity, index) => (
-              <label
-                key={activity.id}
-                className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200 ${
-                  activity.checked
-                    ? 'bg-green-500/20 border border-green-400/30'
-                    : 'bg-white/5 border border-white/10 hover:bg-white/10'
-                }`}
-              >
-                <div className="flex-shrink-0 mt-0.5">
-                  <input
-                    type="checkbox"
-                    checked={activity.checked}
-                    onChange={() => toggleActivity(activity.id)}
-                    className="sr-only"
-                  />
-                  <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
-                    activity.checked
-                      ? 'bg-green-500 border-green-400'
-                      : 'border-purple-300/50 bg-white/5'
-                  }`}>
-                    {activity.checked && (
-                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </div>
-                </div>
-                <span className={`text-sm md:text-base leading-relaxed transition-all duration-200 ${
-                  activity.checked
-                    ? 'text-green-200 line-through opacity-75'
-                    : 'text-white'
-                }`}>
-                  <span className="text-purple-300/60 font-mono text-xs mr-2">{String(index + 1).padStart(2, '0')}.</span>
-                  {activity.text}
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <button
-            onClick={handleSubmit}
-            disabled={status === 'sending'}
-            className={`flex-1 py-4 px-6 rounded-xl font-bold text-lg transition-all duration-200 flex items-center justify-center gap-2 ${
-              status === 'sending'
-                ? 'bg-gray-500/50 text-gray-300 cursor-not-allowed'
-                : 'bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-400 hover:to-emerald-400 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-green-500/25'
-            }`}
-          >
-            {status === 'sending' ? (
-              <>
-                <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Enviando...
-              </>
-            ) : (
-              <>
-                <span>📤</span>
-                Enviar respuestas
-              </>
-            )}
-          </button>
-          <button
-            onClick={handleReset}
-            className="py-4 px-6 rounded-xl font-medium text-purple-200 bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-200"
-          >
-            🔄 Reiniciar
-          </button>
-        </div>
-
-        {/* Status Message */}
-        {statusMessage && (
-          <div className={`rounded-xl p-4 mb-6 border text-center font-medium ${
-            status === 'success'
-              ? 'bg-green-500/20 border-green-400/30 text-green-200'
-              : status === 'error'
-              ? 'bg-red-500/20 border-red-400/30 text-red-200'
-              : 'bg-blue-500/20 border-blue-400/30 text-blue-200'
-          }`}>
-            {status === 'success' && '✅ '}
-            {status === 'error' && '❌ '}
-            {status === 'sending' && '📡 '}
-            {statusMessage}
-          </div>
-        )}
-
-        {/* Info Note */}
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-          <p className="text-purple-300/70 text-sm text-center">
-            💡 Tu nombre identifica tu entrega y permite hacer seguimiento individual de tu progreso.
-          </p>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center mt-8 text-purple-400/50 text-sm">
-          <p>Checklist interactivo • Día 2</p>
-        </div>
-      </div>
-
-      {/* Congrats Modal */}
-      {status === 'success' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-          
-          {/* Modal Content */}
-          <div className="relative bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 rounded-3xl p-8 md:p-10 max-w-lg w-full border border-white/20 shadow-2xl shadow-purple-500/20 animate-fade-in">
-            {/* Confetti decoration */}
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2">
-              <div className="flex gap-2 text-4xl animate-bounce">
-                <span>🎉</span>
-                <span>✨</span>
-                <span>🎊</span>
-              </div>
+    <div className="min-h-screen bg-navy px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-3xl">
+        <div className="sheet-animate border-t-4 border-red bg-white shadow-[0_28px_60px_-32px_rgba(0,0,0,0.65)]">
+          <header className="flex items-start gap-5 border-b border-line px-6 py-8 sm:px-10 sm:py-10">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-navy text-white">
+              <ClipboardList size={24} strokeWidth={1.8} />
             </div>
+            <div>
+              <h1 className="font-display text-4xl leading-none text-navy sm:text-5xl">
+                Checklist del Día 2
+              </h1>
+              <p className="mt-3 max-w-md text-sm leading-relaxed text-muted">
+                Marca cada actividad cuando la termines. Tu progreso se guarda en este dispositivo.
+              </p>
+            </div>
+          </header>
 
-            {/* Close button */}
-            <button
-              onClick={() => {
-                setActivities(initialActivities);
-                setStatus('idle');
-                setStatusMessage('');
-              }}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all"
+          <section className="border-b border-line px-6 py-6 sm:px-10" aria-label="Progreso">
+            <div className="flex items-end justify-between gap-4">
+              <p className="text-sm font-semibold text-navy">Progreso</p>
+              <p className="font-display text-3xl leading-none tabular-nums text-navy">
+                {completedCount}<span className="text-xl text-muted">/{totalCount}</span>
+              </p>
+            </div>
+            <div
+              className="mt-3 h-1.5 w-full bg-line"
+              role="progressbar"
+              aria-valuenow={completedCount}
+              aria-valuemin={0}
+              aria-valuemax={totalCount}
+              aria-label="Actividades completadas"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+              <div
+                className="h-full bg-red transition-[width] duration-500 ease-out"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+            {progressPercent === 100 && (
+              <p className="mt-3 flex items-center gap-2 text-sm font-medium text-red">
+                <Check size={16} strokeWidth={2.5} />
+                Todas las actividades completadas
+              </p>
+            )}
+          </section>
 
-            {/* Content */}
-            <div className="text-center mt-4">
-              <div className="text-6xl mb-4">🏆</div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                ¡Felicitaciones!
-              </h2>
-              <div className="bg-white/10 rounded-2xl p-6 border border-white/20 mb-6">
-                <p className="text-lg text-purple-100 leading-relaxed mb-3">
-                  Ya tienes <strong className="text-white">tres publicaciones publicitarias</strong> y <strong className="text-white">una historia</strong> para tu negocio.
-                </p>
-                <div className="w-full h-px bg-white/20 my-4" />
-                <p className="text-base text-purple-200 leading-relaxed">
-                  En el <strong className="text-yellow-300">Día 3</strong> utilizarás estos materiales para crear un <strong className="text-yellow-300">video promocional con CapCut</strong>. 🎬
-                </p>
-              </div>
+          <section className="border-b border-line px-6 py-6 sm:px-10">
+            <label htmlFor="participant-name" className="flex items-center gap-2 text-sm font-semibold text-navy">
+              <UserRound size={17} strokeWidth={1.8} />
+              Tu nombre
+            </label>
+            <input
+              id="participant-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Escribe tu nombre completo..."
+              className="mt-3 w-full border-b-2 border-line bg-transparent py-2 text-base text-navy outline-none transition-colors placeholder:text-muted/60 focus:border-red"
+            />
+            <p className="mt-2 text-xs leading-relaxed text-muted">
+              Se guarda con tus respuestas para identificar tu entrega.
+            </p>
+          </section>
+
+          <section className="px-6 py-6 sm:px-10" aria-label="Actividades">
+            <div className="mb-1 flex items-baseline justify-between gap-4">
+              <h2 className="text-sm font-semibold text-navy">Actividades</h2>
+              <span className="text-xs tabular-nums text-muted">{completedCount} de {totalCount}</span>
+            </div>
+            <ul>
+              {activities.map((activity, index) => (
+                <li key={activity.id}>
+                  <label className="flex cursor-pointer items-start gap-4 border-t border-line py-3.5 transition-colors hover:bg-wash">
+                    <input
+                      type="checkbox"
+                      checked={activity.checked}
+                      onChange={() => toggleActivity(activity.id)}
+                      className="sr-only"
+                    />
+                    <span className="w-6 shrink-0 pt-0.5 text-xs tabular-nums text-muted">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center border transition-colors ${
+                        activity.checked
+                          ? 'border-red bg-red text-white'
+                          : 'border-muted/50 bg-white text-transparent'
+                      }`}
+                    >
+                      <Check size={14} strokeWidth={3} />
+                    </span>
+                    <span className={`text-sm leading-relaxed ${
+                      activity.checked ? 'text-muted line-through decoration-muted/50' : 'text-navy'
+                    }`}>
+                      {activity.text}
+                    </span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="border-t border-line bg-wash px-6 py-6 sm:px-10">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <button
-                onClick={() => {
-                  setActivities(initialActivities);
-                  setStatus('idle');
-                  setStatusMessage('');
-                }}
-                className="w-full py-4 px-6 rounded-xl font-bold text-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-400 hover:to-emerald-400 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-lg shadow-green-500/25"
+                type="button"
+                onClick={handleSubmit}
+                disabled={status === 'sending'}
+                className="inline-flex flex-1 items-center justify-center gap-2 bg-red px-5 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-red-dark disabled:cursor-not-allowed disabled:bg-muted/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red"
               >
-                ¡Entendido! Continuar ➜
+                {status === 'sending' ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <Send size={18} strokeWidth={1.8} />
+                )}
+                {status === 'sending' ? 'Enviando respuestas...' : 'Enviar respuestas'}
+              </button>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="inline-flex items-center justify-center gap-2 border border-navy/20 bg-white px-5 py-3.5 text-sm font-semibold text-navy transition-colors hover:border-navy focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+              >
+                <RotateCcw size={17} strokeWidth={1.8} />
+                Reiniciar
               </button>
             </div>
+
+            {statusMessage && (
+              <div
+                role="status"
+                aria-live="polite"
+                className={`mt-4 flex items-start gap-2 text-sm ${
+                  status === 'error' ? 'text-red-dark' : status === 'success' ? 'text-navy' : 'text-muted'
+                }`}
+              >
+                {status === 'error' ? (
+                  <AlertCircle size={17} className="mt-px shrink-0" />
+                ) : status === 'success' ? (
+                  <CheckCircle2 size={17} className="mt-px shrink-0 text-red" />
+                ) : (
+                  <Loader2 size={17} className="mt-px shrink-0 animate-spin" />
+                )}
+                <span>{statusMessage}</span>
+              </div>
+            )}
+
+            <div className="mt-5 flex items-start gap-2 border-t border-line pt-4 text-xs leading-relaxed text-muted">
+              <Info size={15} className="mt-px shrink-0" />
+              <p>Tu nombre identifica tu entrega y permite hacer seguimiento individual de tu progreso.</p>
+            </div>
+          </section>
+        </div>
+
+        <p className="mt-6 text-center text-xs text-white/45">Checklist del Día 2</p>
+      </main>
+
+      {status === 'success' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/80 p-4 backdrop-blur-sm">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="success-title"
+            className="sheet-animate relative w-full max-w-md bg-white px-7 py-8 shadow-[0_28px_60px_-24px_rgba(0,0,0,0.55)]"
+          >
+            <button
+              type="button"
+              onClick={handleReset}
+              aria-label="Cerrar"
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center text-muted transition-colors hover:bg-wash hover:text-navy"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="mb-5 flex h-11 w-11 items-center justify-center bg-navy text-white">
+              <Trophy size={22} strokeWidth={1.8} />
+            </div>
+            <h2 id="success-title" className="font-display text-3xl leading-tight text-navy">
+              ¡Listo!
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted">
+              Ya tienes tres publicaciones publicitarias y una historia para tu negocio.
+            </p>
+            <div className="mt-5 border-t border-line pt-5">
+              <p className="text-sm leading-relaxed text-navy">
+                En el Día 3 usarás estos materiales para crear un{' '}
+                <strong className="font-semibold text-red">video promocional con CapCut</strong>.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleReset}
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 bg-navy px-5 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-navy-soft"
+            >
+              Continuar
+              <ArrowRight size={17} strokeWidth={1.8} />
+            </button>
           </div>
         </div>
       )}
