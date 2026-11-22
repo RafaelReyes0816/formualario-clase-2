@@ -69,7 +69,7 @@ function App() {
     }
 
     setStatus('sending');
-    setStatusMessage('Enviando datos...');
+    setStatusMessage('Enviando respuestas...');
 
     try {
       const data = {
@@ -93,7 +93,7 @@ function App() {
 
       // With no-cors mode, we can't read the response, but the request was sent
       setStatus('success');
-      setStatusMessage('¡Datos enviados exitosamente a Google Sheets!');
+      setStatusMessage('¡Respuestas enviadas correctamente!');
     } catch (error) {
       setStatus('error');
       setStatusMessage('Error al enviar. Intenta de nuevo.');
@@ -157,7 +157,7 @@ function App() {
             className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/30 text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all"
           />
           <p className="text-purple-300/70 text-sm mt-2">
-            Tu nombre se incluirá en el registro de Google Sheets
+            Tu nombre se guarda junto a tus respuestas.
           </p>
         </div>
 
@@ -230,7 +230,7 @@ function App() {
             ) : (
               <>
                 <span>📤</span>
-                Enviar a Google Sheets
+                Enviar respuestas
               </>
             )}
           </button>
@@ -261,13 +261,13 @@ function App() {
         {/* Info Note */}
         <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
           <p className="text-purple-300/70 text-sm text-center">
-            💡 <strong>¿Es ideal pedir el nombre?</strong> Sí, porque permite identificar quién completó las actividades y hacer seguimiento individual en Google Sheets. Los datos se guardan automáticamente con tu nombre y fecha.
+            💡 Tu nombre identifica tu entrega y permite hacer seguimiento individual de tu progreso.
           </p>
         </div>
 
         {/* Footer */}
         <div className="text-center mt-8 text-purple-400/50 text-sm">
-          <p>Checklist interactivo • Conectado con Google Sheets</p>
+          <p>Checklist interactivo • Día 2</p>
         </div>
       </div>
 
