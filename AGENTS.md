@@ -1,0 +1,10 @@
+# AGENTS.md
+
+- Single-page React 18 + TypeScript app on Vite 6 with Tailwind 4 (`@tailwindcss/vite`). No router, backend, tests, lint/format, CI, pre-commit, codegen, or migrations — despite `react-router-dom`, `@supabase/supabase-js`, `@dnd-kit/*`, `recharts`, etc. being listed in `package.json`.
+- Verify with `npm run typecheck && npm run build` (those are the only scripts besides `dev`). `npm run dev` is fixed to `0.0.0.0:3000`, `strictPort: true`, HMR on 3000; a busy port fails instead of falling back.
+- `index.html` references `/src/main.jsx`, but the real entrypoint is `src/main.tsx`. Vite's `.jsx` → `.tsx` fallback makes this work; don't add a `main.jsx` or "fix" it unless changing entrypoints intentionally.
+- `src/App.tsx` is effectively the entire app: state, hardcoded 14-item checklist, and UI. `src/main.tsx` only mounts it; `src/index.css` holds the Tailwind import and the custom `animate-fade-in` utility (no `tailwind.config`).
+- `tsconfig.json` is strict and `noEmit` with `allowImportingTsExtensions`; imports may include `.tsx` (e.g. `./App.tsx`). Don't normalize them to extensionless.
+- No env files, no in-app setup UI: `App.tsx` has a hardcoded `DEFAULT_SCRIPT_URL` used directly by `fetch`; only `checklist_name` and `checklist_activities` live in `localStorage`. Treat the URL as a public write endpoint — anyone with it can append rows; changing it means editing the constant.
+- Submission POSTs JSON to that URL with `fetch(..., { mode: 'no-cors' })`, so the response is unreadable: the "success" status and congrats modal are not proof the row was written. The Apps Script `doPost` lives in the Google Sheet's script project; its 14 "Act N" header/row columns must stay in sync with `initialActivities`.
+- `index.html` carries sandbox boilerplate (iframe theme messaging, `sandbox-runtime-error` reporting, `lang="zh-CN"` despite the Spanish UI, Font Awesome CDN). Leave it alone unless the task is about embedding/theme.
